@@ -1,0 +1,8 @@
+{
+    "name": "aoc2021day5",
+    "package-specs": {
+        "in-source": true,
+        "module": "commonjs"
+    },
+    "sources": "src"
+}
