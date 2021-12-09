@@ -4,5 +4,8 @@
         "in-source": true,
         "module": "commonjs"
     },
-    "sources": "src"
+    "sources": {
+        "dir": "src",
+        "subdirs": true
+    }
 }
