@@ -1,8 +1,6 @@
 let testFile = Node.Path.resolve("src/day-6", "test-input.txt")
 let realFile = Node.Path.resolve("src/day-6", "input.txt")
 
-let number = 1_595_330_616_005
-
 let processInput = file =>
   Node.Fs.readFileAsUtf8Sync(file)
   ->Js.String2.split(",")
@@ -16,42 +14,28 @@ let tap = (xs, tag) => {
   xs
 }
 
-// let rec processDays = (eco, days) => {
-//   switch days {
-//   | 0 => eco
-//   | _ => {
-//       let updated =
-//         eco
-//         ->Belt.List.splitAt(1)
-//         ->Belt.Option.getExn
-//         ->(
-//           (first, rest) => {
-//             let firstVal = first->Belt.List.get(0)->Belt.Option.getWithDefault(0.)
-//             let updatedList =
-//               rest
-//               ->Belt.List.map(item => {
-//                 switch item {
-//                 | (idx, val) => (idx - 1, val)
-//                 | _ => item
-//                 }
-//               })
-//               //   ->Belt.List.concat(first)
-//               ->Belt.List.mapWithIndex((i, x) => {
-//                 switch x {
-//                 | (6, val) => (6, val +. firstVal)
-//                 | _ => x
-//                 }
-//               })
-//           }
-//         )
-//       //   let firstVal = eco->Belt.Array.slice(~offset=0, ~len=1)
-//       //   let restOfArray = eco->Belt.Array.sliceToEnd(1)
-//       //   let newEco = restOfArray->Belt.Array.concat(firstVal)
-//       //   eco[6] = eco[6] +. new
-//       processDays(eco, days - 1)
-//     }
-//   }
-// }
+let rec processDays = (eco, days) => {
+  switch days {
+  | 0 => eco
+  | _ => {
+      let first = eco->Belt.List.take(1)->Belt.Option.getWithDefault(list{})
+      let firstVal = first->Belt.List.getAssoc(0, (a, b) => a == b)->Belt.Option.getWithDefault(0.)
+      let newList =
+        eco
+        ->Belt.List.drop(1)
+        ->Belt.Option.getWithDefault(list{})
+        ->Belt.List.concat(first)
+        ->Belt.List.mapWithIndex((i, x) => {
+          let (_, val) = x
+          switch i {
+          | 6 => (6, val +. firstVal)
+          | i => (i, val)
+          }
+        })
+      processDays(newList, days - 1)
+    }
+  }
+}
 
 let rec initEcosystem = (ls, eco) => {
   switch ls {
@@ -64,11 +48,17 @@ let rec initEcosystem = (ls, eco) => {
   }
 }
 
-processInput(testFile)
+processInput(realFile)
 ->(ls => ls->initEcosystem(Belt.List.makeBy(9, i => (i, 0.))))
 ->tap("after initial")
-// ->processDays(18)
-// ->tap("after process")
-// ->Js.Array2.reduce((acc, num) => acc +. num, 0.)
-->Belt.List.toArray
+->processDays(256)
+->(ls => {
+  ls->Belt.List.toArray->Js.log2("after process")
+  ls
+})
+->Belt.List.reduce(0., (acc, pair) =>
+  switch pair {
+  | (_, val) => acc +. val
+  }
+)
 ->Js.log
