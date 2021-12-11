@@ -8,7 +8,6 @@ let processFile = filename =>
   ->Js.Array2.filter(Belt.Option.isSome)
   ->Js.Array2.map(Belt.Option.getExn)
   ->Js.Array2.map(str => str->Js.String2.split(" | "))
-//   ->Js.Array2.map(Js.String2.split("|"))
 
 realFile
 ->processFile
