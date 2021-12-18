@@ -11,7 +11,11 @@ let processInput = filename =>
         ->Belt.Array.get(0)
         ->Belt.Option.getWithDefault("")
         ->Js.String2.split(",")
-        ->Belt.List.fromArray
+        ->Belt.Array.map(Belt.Int.fromString)
+        ->Belt.Array.map(val => switch(val) {
+            | Some(x) => x
+            | None => Js.Exn.raiseError("strings could not be parsed to ints")
+        })
       let boards =
         arr
         ->Belt.Array.sliceToEnd(1)
@@ -41,10 +45,22 @@ let processInput = filename =>
     }
   )
 
+let didMatrixWin = (numbers, board) => {
+    let didRowsWin = numbers->Belt.Array.map(row => )
+}
+
+let rec play = (numbers, boards) => {
+    playInternal(numbers, boards, list{})
+} and playInternal = (numbers, boards, calledNums) => {
+    switch(numbers) => {
+
+    }
+}
+
 testFile
 ->processInput
 ->(tuple => {
   let (numbers, boards) = tuple
-  boards[0]
+  play(numbers, boards)
 })
 ->Js.log
