@@ -86,7 +86,7 @@ let rec testX: (range, probe) => bool = (range, probe) => {
   }
 }
 
-let rec findPotentialXValues: range => array<int> = range => {
+let rec findPotentialXVelocities: range => array<int> = range => {
   let (_, xmax) = range["x"]
   range->findXInner(xmax, [])
 }
@@ -107,7 +107,7 @@ and findXInner = (range, testNum, values) => {
 let _ = {
   try {
     let range = testFile->getInput
-    range->findPotentialXValues->Js.log
+    range->findPotentialXVelocities->Js.log
   } catch {
   | _ => Js.log("something went wrong")
   }
