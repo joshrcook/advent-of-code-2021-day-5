@@ -65,17 +65,26 @@ let didBoardWin = (numbers, board) => {
 }
 
 let rec play = (numbers, boards) => {
-  playInternal(numbers, boards, [])
+  playInternal(numbers, boards, [], [])
 }
-and playInternal = (numbers, boards, calledNums) => {
+and playInternal = (numbers, boards, calledNums, winningBoards) => {
   let firstNumber = numbers->Js.Array2.shift
   switch firstNumber {
   | Some(x) => {
       let _ = calledNums->Js.Array2.push(x)
-      let winningBoards = boards->Belt.Array.keep(board => didBoardWin(calledNums, board))
-      switch winningBoards->Belt.Array.length {
-      | 0 => playInternal(numbers, boards, calledNums)
-      | _ => (calledNums, winningBoards)
+      let (losingBoards, winningBoards) = boards->Belt.Array.reduce(([], winningBoards), (
+        acc,
+        board,
+      ) => {
+        let (losing, winning) = acc
+        switch didBoardWin(calledNums, board) {
+        | true => (losing, winning->Belt.Array.concat([board]))
+        | false => (losing->Belt.Array.concat([board]), winning)
+        }
+      })
+      switch losingBoards->Belt.Array.length {
+      | 0 => (calledNums, winningBoards)
+      | _ => playInternal(numbers, losingBoards, calledNums, winningBoards)
       }
     }
   | None => (calledNums, [])
@@ -98,7 +107,7 @@ realFile
   play(numbers, boards)
 })
 ->(((calledNums, boards)) => {
-  let firstBoard = boards->Belt.Array.get(0)->Belt.Option.getWithDefault([[]])
-  calledNums->getScore(firstBoard)
+  let lastBoard = boards->Belt.Array.reverse->Belt.Array.get(0)->Belt.Option.getWithDefault([[]])
+  calledNums->getScore(lastBoard)
 })
 ->Js.log
