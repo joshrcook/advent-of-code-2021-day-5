@@ -83,23 +83,12 @@ let rec testX: (range, probe) => bool = (range, probe) => {
     probe => {
       let (xmin, xmax) = range["x"]
       let (xvelocity, _) = probe["velocity"]
-      switch xvelocity {
-      | 0 => {
-          let (xpos, _) = probe["position"]
-          switch xpos {
-          | xpos if xpos >= xmin && xpos <= xmax => true
-          | _ => false
-          }
-        }
-      | _ => testX(range, probe)
+      switch probe["position"] {
+      | (xpos, _) if xpos >= xmin && xpos <= xmax => true
+      | (xpos, _) if xpos > xmax => false
+      | (xpos, _) if xpos < xmin && xvelocity != 0 => testX(range, probe)
+      | _ => false
       }
-      // Note: old way of testing below
-      // switch probe["position"] {
-      // | (xpos, _) if xpos >= xmin && xpos <= xmax => true
-      // | (xpos, _) if xpos > xmax => false
-      // | (xpos, _) if xpos < xmin && xvelocity != 0 => testX(range, probe)
-      // | _ => false
-      // }
     }
   }
 }
@@ -137,18 +126,19 @@ and findXInner = (range, testNum, values) => {
   }
 }
 
-let rec getHighestYFromX = (x, range) => {
-  x->getYInner(range, 0, [])
+let rec getYHits = (x, range) => {
+  let (ymin, _) = range["y"]
+  x->getYInner(range, ymin - 1, [])
 }
 and getYInner = (x, range, y, acc) => {
   let probe = makeProbe(x, y)
   let result = test(range, probe)
   switch y {
-  | 1000 => acc->Js.Math.maxMany_int
+  | 1000 => acc
   | _ =>
     switch result {
     | Target => getYInner(x, range, y + 1, acc->Belt.Array.concat([y]))
-    | Long => acc->Js.Math.maxMany_int
+    | Long => acc
     | _ => getYInner(x, range, y + 1, acc)
     }
   }
@@ -156,25 +146,14 @@ and getYInner = (x, range, y, acc) => {
 
 let _ = {
   try {
-    let range = testFile->getInput
+    let range = realFile->getInput
     let xPotentials = range->findPotentialXVelocities
     xPotentials->Js.log2("potential")
-    let highestYs = xPotentials->Belt.Array.map(x => (x, x->getHighestYFromX(range)))
-    let highestY = highestYs->Belt.Array.map(((_, y)) => y)->Js.Math.maxMany_int
-    let pair = highestYs->Js.Array2.find(pair =>
-      switch pair {
-      | (_, y) if y == highestY => true
-      | _ => false
-      }
-    )
-    switch pair {
-    | Some(pair) => {
-        let (x, y) = pair
-        let probe = makeProbe(x, y)
-        getMaxY(range, probe)->Js.log2("is the highest y value")
-      }
-    | None => Js.log("something went wrong")
-    }
+    xPotentials
+    ->Belt.Array.map(x => x->getYHits(range)->Belt.Array.map(y => (x, y)))
+    ->Belt.Array.concatMany
+    ->Belt.Array.length
+    ->Js.log
   } catch {
   | _ => Js.log("something went wrong")
   }
