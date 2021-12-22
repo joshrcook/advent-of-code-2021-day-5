@@ -98,8 +98,8 @@ let str = initialTemplate->processTemplateWithRules(insertionRules, 10)
 
 str->Js.log
 
-// let characterCount = str->countCharactersInString
+let characterCount = str->countCharactersInString
 
-// characterCount->Js.log
+characterCount->Js.log
 
-// characterCount->getAnswer->Js.log2("is the answer")
+characterCount->getAnswer->Js.log2("is the answer")

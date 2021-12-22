@@ -19,18 +19,20 @@ let getInput = file => {
 let increment = num => num + 1
 let incrementMatrix = arr => arr->Belt.Array.map(y => y->Belt.Array.map(increment))
 
-let rec step = (arr, num) => {
-  stepInternal(arr, num, 0)
+let rec step = arr => {
+  stepInternal(arr, 0, 0)
 }
 and stepInternal = (arr, num, acc) => {
-  switch num {
-  | 0 => (arr, acc)
-  | _ =>
-    arr
-    ->incrementMatrix
-    ->flash(acc)
-    ->{
-      ((arr, acc)) => arr->stepInternal(num - 1, acc)
+  arr
+  ->incrementMatrix
+  ->flash(acc)
+  ->{
+    ((arr, acc)) => {
+      let allFlashed = arr->Belt.Array.concatMany->Belt.Array.every(num => num == 0)
+      switch allFlashed {
+      | true => num + 1
+      | false => arr->stepInternal(num + 1, acc)
+      }
     }
   }
 }
@@ -84,7 +86,7 @@ let matrixToString = arr =>
 
 let _ = {
   try {
-    realFile->getInput->step(100)->Js.log
+    realFile->getInput->step->Js.log
   } catch {
   | InputException => Js.log("Could not get input")
   | _ => Js.log("An unexpected error occurred")
