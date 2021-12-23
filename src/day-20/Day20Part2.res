@@ -194,7 +194,7 @@ let _ = {
     ->{
       ((algo, starter)) => {
         algo->Js.log
-        starter->processSteps(algo, "0", 2)->matrixCount("1")->Js.log2("is the answer")
+        starter->processSteps(algo, "0", 50)->matrixCount("1")->Js.log2("is the answer")
       }
     }
   } catch {
