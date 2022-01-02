@@ -1,6 +1,6 @@
 let _ = {
   let testFile = Node.Path.resolve("src/day-15", "test-input.txt")
-  let realFile = Node.Path.resolve("src/day-15", "input.txt")
+  // let realFile = Node.Path.resolve("src/day-15", "input.txt")
 
   let xyToKey: (int, int) => string = (x, y) =>
     [x, y]->Belt.Array.map(Belt.Int.toString)->Js.Array2.joinWith(",")

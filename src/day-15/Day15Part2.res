@@ -1,5 +1,5 @@
 let _ = {
-  let testFile = Node.Path.resolve("src/day-15", "test-input.txt")
+  // let testFile = Node.Path.resolve("src/day-15", "test-input.txt")
   let realFile = Node.Path.resolve("src/day-15", "input.txt")
 
   let processInput = filename =>
@@ -139,8 +139,8 @@ let _ = {
     }
   }
 
-  let matrixToString = matrix =>
-    matrix->Belt.Array.map(row => row->Js.Array2.joinWith(""))->Js.Array2.joinWith("\n")
+  // let matrixToString = matrix =>
+  //   matrix->Belt.Array.map(row => row->Js.Array2.joinWith(""))->Js.Array2.joinWith("\n")
 
   // let rec answerToString = (graph, parents) => {
   //   let stringAcc = graph->Belt.Array.map(row => row->Belt.Array.map(_ => "-"))
