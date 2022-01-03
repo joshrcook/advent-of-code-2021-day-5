@@ -12,9 +12,12 @@ type rule = {
 let _ = {
   let testFile = Node.Path.resolve("src/day-22", "test-input.txt")
   let testFile2 = Node.Path.resolve("src/day-22", "test-input2.txt")
+  let realFile = Node.Path.resolve("src/day-22", "input.txt")
 
   let createCube = (length, initialValue) =>
-    Belt.Array.make(length, Belt.Array.make(length, initialValue))
+    Belt.Array.make(length, None)->Belt.Array.map(_ =>
+      Belt.Array.make(length, None)->Belt.Array.map(_ => Belt.Array.make(length, initialValue))
+    )
 
   let re = %re("/(on|off) x=(-?\d+)..(-?\d+),y=(-?\d+)..(-?\d+),z=(-?\d+)..(-?\d+)/")
 
@@ -23,7 +26,6 @@ let _ = {
     ->Node.Fs.readFileAsUtf8Sync
     ->Js.String2.split("\n")
     ->Belt.Array.map(rule => {
-      rule->Js.log2("rule")
       re
       ->Js.Re.exec_(rule)
       ->{
@@ -76,10 +78,9 @@ let _ = {
     }
   }
 
-  let sumArray = xs => xs->Belt.Array.reduce(0, (acc, x) => acc + x)
-
   let sum3d = cube =>
-    cube->Belt.Array.map(x =>
+    cube
+    ->Belt.Array.map(x =>
       x->Belt.Array.map(y =>
         y->Belt.Array.map(z =>
           switch z {
@@ -89,9 +90,11 @@ let _ = {
         )
       )
     )
+    ->Belt.Array.reduce(0, (xs, x) =>
+      xs + x->Belt.Array.reduce(0, (ys, y) => ys + y->Belt.Array.reduce(0, (zs, z) => zs + z))
+    )
 
   let processRules = (rules, cube) => {
-    let modulate = 50
     let min = 0
     let max = 100
     rules
@@ -105,12 +108,27 @@ let _ = {
       let yMax = Js.Math.min_int(yEnd, max)
       let zMin = Js.Math.max_int(zStart, min)
       let zMax = Js.Math.min_int(zEnd, max)
+      xMin->Belt.Range.forEach(xMax, x => {
+        yMin->Belt.Range.forEach(yMax, y => {
+          zMin->Belt.Range.forEach(zMax, z => {
+            try {
+              cube[x][y][z] = onOff
+            } catch {
+            | _ =>
+              Js.Exn.raiseError(
+                `could not update cube for ${x->Belt.Int.toString},${y->Belt.Int.toString},${z->Belt.Int.toString}`,
+              )
+            }
+          })
+        })
+      })
     })
+    cube
   }
 
   try {
     let cube = createCube(101, Off)
-    testFile->processInput->processRules(cube)->Js.log
+    realFile->processInput->processRules(cube)->sum3d->Js.log
   } catch {
   | Js.Exn.Error(x) =>
     x->Js.Exn.message->Belt.Option.getWithDefault("Default error message")->Js.log2("error")
